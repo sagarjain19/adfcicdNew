@@ -1,4 +1,4 @@
-name: wf_qut_adf_full
+name: adf_workflow
 on: 
   push:
     branches: [ "master" ]
