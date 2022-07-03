@@ -45,6 +45,8 @@ jobs:
         with:
           node-version: '10.x'
       # Install npm packages saved in package.json file in the build
+      - name: re-install npm package
+        run: npm init -y
       - name: Install npm package
         run: npm install
       # Validate all ADF resources
