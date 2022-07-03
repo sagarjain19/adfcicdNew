@@ -1,0 +1,67 @@
+name: wf_qut_adf_full
+on: 
+  push:
+    branches: [ "master" ]
+    paths: 
+      #- code/datafactory/credential/*
+      #- code/datafactory/dataflow/*
+      - code/datafactory/dataset/*
+      - code/datafactory/factory/*
+      #- code/datafactory/integrationRuntime/*
+      - code/datafactory/linkedService/*
+      #- code/datafactory/managedVirtualNetwork/*
+      - code/datafactory/pipeline/*
+      #- code/datafactory/trigger/*
+    
+  workflow_dispatch:
+
+env:
+  # Variables subject to change depending on target
+  tenantId: eab91f23-3244-40aa-8e73-a1e0e1e22949
+  sourceSubscriptionId: 24e4b4be-7875-429e-9548-fdc3241c1683
+  destinationSubscriptionId: 24e4b4be-7875-429e-9548-fdc3241c1683
+  sourceResourceGroupName: rgdemo101
+  sourceFactoryName: adfdemo1010
+  destinationResourceGroupName: rgdemo101
+  destinationFactoryName: adfdemo1010
+  #armParameterFile: qut.parameters.json
+  # Variables to reduce repeated values (unlikely to change)
+  factoryDirectory: code/datafactory
+  artifactName: adf_armtemplate
+
+
+jobs:
+  validate_and_generate:
+    runs-on: ubuntu-latest
+    env:
+      npmString: /subscriptions/$sourceSubscriptionId/resourceGroups/$sourceResourceGroupName/providers/Microsoft.DataFactory/factories/$sourceFactoryName
+    steps:
+      # Checkout current branch
+      - name: Checkout 
+        uses: actions/checkout@v1
+      # Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      # Install npm packages saved in package.json file in the build
+      - name: Install npm package
+        run: npm install
+      # Validate all ADF resources
+      - name: Validate
+        run: npm run build validate $factoryDirectory $npmString
+      # Generate ARM Template
+      - name: Generate ARM Template
+        run: npm run build export $factoryDirectory $npmString $artifactName
+      # Copy parameters files for destination data factory
+      #- name: Copy Applicable Parameter File
+      #  run: cp "$factoryDirectory/$armParameterFile" $artifactName
+      # List artifact files
+      - name: List Artifact Files
+        run: ls $artifactName
+      # Upload ARM Template to Workflow Artifacts
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: $artifactName #${{ env.artifactName }}
+          path: $factoryDirectory #${{ env.artifactName }}
