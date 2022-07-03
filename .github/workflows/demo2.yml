@@ -48,8 +48,11 @@ jobs:
       
       - name: Install npm package
         run: rm -rf node_modules
+      - name: Install npm package
         run: npm install
+      - name: Install npm package
         run: git commit package-lock.json
+      - name: Install npm package
         run: git push
       # Validate all ADF resources
       - name: Validate
